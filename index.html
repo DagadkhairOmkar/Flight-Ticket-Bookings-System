@@ -1,0 +1,750 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkyFly - Flight Reservation System</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
+body{background:#f2f6fc;color:#172033}
+
+nav{
+background:#06265c;color:white;padding:18px 6%;
+display:flex;justify-content:space-between;align-items:center;
+position:sticky;top:0;z-index:10
+}
+.logo{font-size:26px;font-weight:bold}
+nav a{color:white;text-decoration:none;margin-left:22px;font-weight:bold}
+
+.hero{
+min-height:370px;padding:85px 8%;color:white;
+background:linear-gradient(#06265ccc,#06265ccc),
+url("https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80") center/cover
+}
+.hero h1{font-size:48px;margin-bottom:15px}
+.hero p{font-size:20px;max-width:650px}
+
+.container{width:92%;max-width:1150px;margin:-50px auto 50px}
+.card{
+background:white;padding:30px;border-radius:18px;
+box-shadow:0 8px 30px #0002;margin-bottom:25px
+}
+
+h2{color:#06265c;margin-bottom:20px}
+h3{margin-bottom:8px}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:18px
+}
+
+label{display:block;font-weight:bold;margin-bottom:7px}
+input,select{
+width:100%;padding:13px;border:1px solid #ccd4df;
+border-radius:8px;font-size:15px
+}
+
+button,.btn{
+border:0;padding:13px 20px;border-radius:8px;
+background:#1264db;color:white;font-weight:bold;
+cursor:pointer
+}
+button:hover{background:#084fae}
+
+.searchbox{
+background:#edf5ff;
+padding:20px;border-radius:12px;margin-bottom:25px
+}
+
+.flight-list{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:18px
+}
+
+.flight{
+border:2px solid #ddd;border-radius:14px;
+overflow:hidden;cursor:pointer;background:white;
+transition:.2s
+}
+.flight:hover,.flight.selected{
+border-color:#1264db;
+transform:translateY(-3px)
+}
+.flight img{
+width:100%;height:150px;object-fit:cover
+}
+.flight-info{padding:17px}
+.flight-info p{margin:8px 0;color:#667085}
+
+.seats{
+display:grid;
+grid-template-columns:repeat(6,45px);
+gap:10px;
+margin-top:15px
+}
+.seat{
+padding:11px 2px;text-align:center;
+border:1px solid #aaa;border-radius:6px;
+cursor:pointer
+}
+.seat:hover{background:#dcecff}
+.seat.selected{background:#1264db;color:white}
+.seat.booked{
+background:#d9534f;color:white;cursor:not-allowed
+}
+
+.legend{margin:15px 0}
+.legend span{
+display:inline-block;padding:7px 12px;
+margin-right:7px;border-radius:5px
+}
+.available{background:#eee}
+.selected-box{background:#1264db;color:white}
+.booked-box{background:#d9534f;color:white}
+
+.summary{
+background:#edf5ff;padding:20px;
+border-radius:12px;margin-top:25px
+}
+.row{
+display:flex;justify-content:space-between;
+padding:8px
+}
+.total{
+border-top:1px solid #bbb;
+font-size:21px;font-weight:bold
+}
+
+.payment{
+display:none;
+background:#f8fbff;
+padding:20px;
+border-radius:12px;
+margin-top:20px
+}
+
+.success{
+display:none;
+background:#e9f9ef;
+color:#137333;
+padding:18px;
+border-radius:10px;
+margin-top:20px;
+font-weight:bold
+}
+
+.dsa{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px
+}
+.dsa div{
+background:#f5f8ff;
+padding:18px;
+border-radius:10px;
+border-left:4px solid #1264db
+}
+
+footer{
+background:#06265c;color:white;
+padding:30px;text-align:center
+}
+
+@media(max-width:850px){
+.flight-list,.dsa{grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){
+.grid,.flight-list,.dsa{grid-template-columns:1fr}
+.hero h1{font-size:34px}
+.seats{grid-template-columns:repeat(6,38px);gap:6px}
+}
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="logo">✈️ SkyFly</div>
+<div>
+<a href="index.html">Book Flight</a>
+<a href="bookings.html">My Bookings</a>
+</div>
+</nav>
+
+<section class="hero">
+<h1>Complete Flight Reservation System</h1>
+<p>
+Search flights, select your seat, calculate fare,
+make demo payment and get your PNR + QR e-ticket.
+</p>
+</section>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div class="card">
+<h2>🔐 Passenger Login</h2>
+
+<div class="grid">
+
+<div>
+<label>Passenger Name</label>
+<input id="name" placeholder="Enter full name">
+</div>
+
+<div>
+<label>Mobile Number</label>
+<input id="mobile" maxlength="10" placeholder="10 digit mobile number">
+</div>
+
+</div>
+
+</div>
+
+<!-- SEARCH -->
+<div class="card">
+
+<h2>🔎 Search Flight</h2>
+
+<div class="searchbox">
+
+<div class="grid">
+
+<div>
+<label>From</label>
+<select id="source">
+<option value="">Select Airport</option>
+<option>Pune (PNQ)</option>
+<option>Mumbai (BOM)</option>
+<option>Delhi (DEL)</option>
+<option>Bangalore (BLR)</option>
+</select>
+</div>
+
+<div>
+<label>Destination</label>
+<select id="destination">
+<option value="">Select Destination</option>
+<option>Mumbai (BOM)</option>
+<option>Delhi (DEL)</option>
+<option>Bangalore (BLR)</option>
+<option>Goa (GOI)</option>
+<option>Hyderabad (HYD)</option>
+<option>Chennai (MAA)</option>
+</select>
+</div>
+
+<div>
+<label>Travel Date</label>
+<input type="date" id="date">
+</div>
+
+<div>
+<label>Flight Time</label>
+<select id="time">
+<option>06:30 AM</option>
+<option>09:15 AM</option>
+<option>01:30 PM</option>
+<option>05:45 PM</option>
+<option>09:00 PM</option>
+</select>
+</div>
+
+</div>
+
+<br>
+<button onclick="searchFlights()">🔎 Search Flights</button>
+
+</div>
+
+<div id="flightMessage"></div>
+
+<div class="flight-list">
+
+<div class="flight" onclick="selectFlight(this,'SK101',4500,'Pune → Delhi','06:30 AM')">
+<img src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=800&q=80">
+<div class="flight-info">
+<h3>SK101</h3>
+<p>✈ Pune → Delhi</p>
+<p>🕐 06:30 AM</p>
+<b>₹4,500</b>
+</div>
+</div>
+
+<div class="flight" onclick="selectFlight(this,'SK202',5500,'Mumbai → Bangalore','01:30 PM')">
+<img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80">
+<div class="flight-info">
+<h3>SK202</h3>
+<p>✈ Mumbai → Bangalore</p>
+<p>🕐 01:30 PM</p>
+<b>₹5,500</b>
+</div>
+</div>
+
+<div class="flight" onclick="selectFlight(this,'SK303',6500,'Mumbai → Goa','05:45 PM')">
+<img src="https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=800&q=80">
+<div class="flight-info">
+<h3>SK303</h3>
+<p>✈ Mumbai → Goa</p>
+<p>🕐 05:45 PM</p>
+<b>₹6,500</b>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- SEAT -->
+<div class="card">
+
+<h2>💺 Select Your Seat</h2>
+
+<div class="legend">
+<span class="available">Available</span>
+<span class="selected-box">Selected</span>
+<span class="booked-box">Booked</span>
+</div>
+
+<div class="seats" id="seatMap"></div>
+
+<p style="margin-top:15px">
+Selected Seat: <b id="selectedSeat">None</b>
+</p>
+
+</div>
+
+<!-- OPTIONS -->
+<div class="card">
+
+<h2>🧳 Additional Services</h2>
+
+<div class="grid">
+
+<div>
+<label>Travel Class</label>
+<select id="travelClass" onchange="calculateFare()">
+<option value="1">Economy</option>
+<option value="1.5">Premium Economy</option>
+<option value="2">Business</option>
+</select>
+</div>
+
+<div>
+<label>Meal</label>
+<select id="meal" onchange="calculateFare()">
+<option value="0">No Meal</option>
+<option value="250">Veg Meal + ₹250</option>
+<option value="300">Non-Veg Meal + ₹300</option>
+<option value="200">Jain Meal + ₹200</option>
+</select>
+</div>
+
+<div>
+<label>Baggage</label>
+<select id="bag" onchange="calculateFare()">
+<option value="0">15 KG Included</option>
+<option value="500">20 KG + ₹500</option>
+<option value="1000">30 KG + ₹1000</option>
+</select>
+</div>
+
+<div>
+<label>Promo Code</label>
+<input id="promo" placeholder="Try FLY10" oninput="calculateFare()">
+</div>
+
+</div>
+
+</div>
+
+<!-- FARE -->
+<div class="card">
+
+<h2>💰 Fare Summary</h2>
+
+<div class="summary">
+
+<div class="row">
+<span>Base Fare</span>
+<b id="base">₹0</b>
+</div>
+
+<div class="row">
+<span>Extra Services</span>
+<b id="extras">₹0</b>
+</div>
+
+<div class="row">
+<span>GST</span>
+<b id="gst">₹0</b>
+</div>
+
+<div class="row">
+<span>Discount</span>
+<b id="discount">₹0</b>
+</div>
+
+<div class="row">
+<span>Convenience Fee</span>
+<b>₹150</b>
+</div>
+
+<div class="row total">
+<span>Total Fare</span>
+<b id="total">₹0</b>
+</div>
+
+</div>
+
+</div>
+
+<!-- PAYMENT -->
+<div class="card">
+
+<h2>💳 Payment</h2>
+
+<button onclick="showPayment()">Proceed to Payment</button>
+
+<div class="payment" id="payment">
+
+<div class="grid">
+
+<div>
+<label>Payment Method</label>
+<select id="paymentMethod">
+<option>UPI</option>
+<option>Debit Card</option>
+<option>Credit Card</option>
+<option>Net Banking</option>
+</select>
+</div>
+
+<div>
+<label>Payment Reference</label>
+<input id="paymentRef" placeholder="Enter UPI / Card reference">
+</div>
+
+</div>
+
+<button style="margin-top:20px" onclick="confirmBooking()">
+💳 Pay & Confirm Booking
+</button>
+
+</div>
+
+<div class="success" id="success">
+✓ Payment Successful! Your ticket is being generated...
+</div>
+
+</div>
+
+<!-- DSA -->
+<div class="card">
+
+<h2>🏆 DSA Used in Flight Reservation</h2>
+
+<div class="dsa">
+
+<div>
+<h3>Dictionary</h3>
+<p>Stores flight and passenger details using key-value pairs.</p>
+</div>
+
+<div>
+<h3>List</h3>
+<p>Stores available flights and booking records.</p>
+</div>
+
+<div>
+<h3>Queue</h3>
+<p>Maintains waiting passengers when seats are full.</p>
+</div>
+
+<div>
+<h3>Stack</h3>
+<p>Stores cancelled bookings for undo/recovery operations.</p>
+</div>
+
+<div>
+<h3>Searching</h3>
+<p>Search flights and PNR records quickly.</p>
+</div>
+
+<div>
+<h3>Sorting</h3>
+<p>Sort flights by price or departure time.</p>
+</div>
+
+<div>
+<h3>Hashing</h3>
+<p>PNR is used as a unique key for fast booking lookup.</p>
+</div>
+
+<div>
+<h3>Reservation</h3>
+<p>Seat availability and booking information are managed dynamically.</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+<h3>✈️ SkyFly Flight Reservation System</h3>
+<p>College DSA Project | Designed for Educational Purpose</p>
+<p>Created by: Omkar Dagadkhair | SE A 31</p>
+</footer>
+
+<script>
+
+let selectedFlight="";
+let flightPrice=0;
+let selectedSeat="";
+
+/* LIST + DICTIONARY */
+const flights=[
+{code:"SK101",route:"Pune → Delhi",time:"06:30 AM",price:4500},
+{code:"SK202",route:"Mumbai → Bangalore",time:"01:30 PM",price:5500},
+{code:"SK303",route:"Mumbai → Goa",time:"05:45 PM",price:6500}
+];
+
+/* SEAT MAP */
+const seats=[
+"1A","1B","1C","1D","1E","1F",
+"2A","2B","2C","2D","2E","2F",
+"3A","3B","3C","3D","3E","3F",
+"4A","4B","4C","4D","4E","4F",
+"5A","5B","5C","5D","5E","5F"
+];
+
+/* QUEUE - WAITING LIST */
+let waitingQueue=[];
+
+/* STACK - CANCELLED BOOKINGS */
+let cancelledStack=[];
+
+const bookedSeats=["1C","2E","3D","4A"];
+
+function createSeats(){
+
+let map=document.getElementById("seatMap");
+
+seats.forEach(s=>{
+
+let div=document.createElement("div");
+
+div.className="seat";
+
+div.innerText=s;
+
+if(bookedSeats.includes(s)){
+div.classList.add("booked");
+}else{
+div.onclick=()=>selectSeat(div,s);
+}
+
+map.appendChild(div);
+
+});
+
+}
+
+createSeats();
+
+function selectSeat(element,seat){
+
+document.querySelectorAll(".seat")
+.forEach(x=>x.classList.remove("selected"));
+
+element.classList.add("selected");
+
+selectedSeat=seat;
+
+document.getElementById("selectedSeat").innerText=seat;
+
+}
+
+/* SEARCH */
+function searchFlights(){
+
+let from=document.getElementById("source").value;
+let to=document.getElementById("destination").value;
+
+if(from && to && from===to){
+
+document.getElementById("flightMessage").innerHTML=
+"<p style='color:red;margin-bottom:15px'>⚠️ Source and destination cannot be same.</p>";
+
+return;
+}
+
+document.getElementById("flightMessage").innerHTML=
+"<p style='color:green;margin-bottom:15px'>✓ "+flights.length+
+" flights found. Select your preferred flight.</p>";
+
+}
+
+/* SORTING - LOW PRICE */
+flights.sort((a,b)=>a.price-b.price);
+
+function selectFlight(element,code,price,route,time){
+
+document.querySelectorAll(".flight")
+.forEach(x=>x.classList.remove("selected"));
+
+element.classList.add("selected");
+
+selectedFlight=code;
+flightPrice=price;
+
+calculateFare();
+
+}
+
+/* FARE CALCULATION */
+function calculateFare(){
+
+let multiplier=
+Number(document.getElementById("travelClass").value);
+
+let meal=
+Number(document.getElementById("meal").value);
+
+let bag=
+Number(document.getElementById("bag").value);
+
+let base=flightPrice*multiplier;
+
+let extras=meal+bag;
+
+let gst=(base+extras)*0.05;
+
+let subtotal=base+extras+gst+150;
+
+let discount=0;
+
+if(document.getElementById("promo").value.toUpperCase()==="FLY10"){
+discount=subtotal*0.10;
+}
+
+let total=subtotal-discount;
+
+document.getElementById("base").innerText="₹"+base.toFixed(0);
+document.getElementById("extras").innerText="₹"+extras.toFixed(0);
+document.getElementById("gst").innerText="₹"+gst.toFixed(0);
+document.getElementById("discount").innerText="₹"+discount.toFixed(0);
+document.getElementById("total").innerText="₹"+total.toFixed(0);
+
+return total;
+
+}
+
+/* PAYMENT */
+function showPayment(){
+
+if(!selectedFlight){
+alert("Please select a flight.");
+return;
+}
+
+if(!selectedSeat){
+alert("Please select a seat.");
+return;
+}
+
+if(!document.getElementById("name").value){
+alert("Please enter passenger name.");
+return;
+}
+
+document.getElementById("payment").style.display="block";
+
+}
+
+/* HASHING - PNR */
+function generatePNR(){
+
+return "SKY"+
+Math.floor(100000+Math.random()*900000);
+
+}
+
+/* BOOKING */
+function confirmBooking(){
+
+let name=document.getElementById("name").value;
+let mobile=document.getElementById("mobile").value;
+
+if(name==="" || mobile===""){
+alert("Please enter passenger details.");
+return;
+}
+
+if(mobile.length!==10){
+alert("Enter valid 10 digit mobile number.");
+return;
+}
+
+let pnr=generatePNR();
+
+let booking={
+name:name,
+mobile:mobile,
+source:document.getElementById("source").value,
+destination:document.getElementById("destination").value,
+date:document.getElementById("date").value,
+time:document.getElementById("time").value,
+flight:selectedFlight,
+seat:selectedSeat,
+class:document.getElementById("travelClass").selectedOptions[0].text,
+meal:document.getElementById("meal").selectedOptions[0].text,
+bag:document.getElementById("bag").selectedOptions[0].text,
+payment:document.getElementById("paymentMethod").value,
+price:calculateFare().toFixed(0),
+pnr:pnr,
+status:"CONFIRMED"
+};
+
+/* LIST */
+let bookings=
+JSON.parse(localStorage.getItem("bookings"))||[];
+
+bookings.push(booking);
+
+localStorage.setItem(
+"bookings",
+JSON.stringify(bookings)
+);
+
+/* HASH TABLE */
+localStorage.setItem(
+"PNR_"+pnr,
+JSON.stringify(booking)
+);
+
+/* LATEST */
+localStorage.setItem(
+"latest",
+JSON.stringify(booking)
+);
+
+document.getElementById("success").style.display="block";
+
+setTimeout(()=>{
+location.href="ticket.html";
+},1200);
+
+}
+
+</script>
+
+</body>
+</html>
+```
+

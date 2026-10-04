@@ -1,0 +1,214 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>SkyFly - My Bookings</title>
+
+<style>
+*{box-sizing:border-box;font-family:Arial}
+body{margin:0;background:#f3f7fc}
+nav{background:#06265c;color:white;padding:18px 7%;display:flex;justify-content:space-between}
+nav a{color:white;text-decoration:none;margin-left:20px}
+.container{width:90%;max-width:1100px;margin:40px auto}
+.search{background:white;padding:20px;border-radius:12px;margin:20px 0}
+.search input{width:100%;padding:14px;border:1px solid #ccd4df;border-radius:8px}
+.booking{background:white;padding:25px;border-radius:15px;margin-bottom:18px;box-shadow:0 5px 20px #0001}
+.top{display:flex;justify-content:space-between;border-bottom:1px solid #ddd;padding-bottom:15px}
+.pnr{color:#1264db;font-weight:bold}
+.confirmed{color:#16823b;font-weight:bold}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-top:20px}
+.item small{color:#777}
+.item h3{margin-top:6px}
+button{padding:11px 20px;background:#1264db;color:white;border:0;border-radius:7px;cursor:pointer;margin:5px}
+.cancel{background:#d9534f}
+.empty{background:white;padding:60px;text-align:center;border-radius:15px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+
+<body>
+
+<nav>
+<strong>✈ SkyFly</strong>
+<div>
+<a href="index.html">Book Flight</a>
+<a href="bookings.html">My Bookings</a>
+</div>
+</nav>
+
+<div class="container">
+
+<h1>📋 My Bookings</h1>
+<p>Search your booking using passenger name or PNR.</p>
+
+<div class="search">
+<input id="search"
+placeholder="🔍 Search Passenger / PNR"
+onkeyup="searchBooking()">
+</div>
+
+<div id="list"></div>
+
+</div>
+
+<script>
+
+let bookings=
+JSON.parse(localStorage.getItem("bookings"))||[];
+
+function show(data){
+
+let list=document.getElementById("list");
+
+list.innerHTML="";
+
+if(data.length===0){
+
+list.innerHTML=`
+<div class="empty">
+<h2>✈ No Booking Found</h2>
+<p>Book your flight to see it here.</p>
+<br>
+<button onclick="location.href='index.html'">
+Book Flight
+</button>
+</div>`;
+
+return;
+}
+
+data.forEach(b=>{
+
+list.innerHTML+=`
+
+<div class="booking">
+
+<div class="top">
+
+<div>
+<h2>${b.flight}</h2>
+<span class="pnr">PNR: ${b.pnr}</span>
+</div>
+
+<div class="confirmed">
+✓ ${b.status}
+</div>
+
+</div>
+
+<div class="grid">
+
+<div class="item">
+<small>Passenger</small>
+<h3>${b.name}</h3>
+</div>
+
+<div class="item">
+<small>Route</small>
+<h3>${b.source} → ${b.destination}</h3>
+</div>
+
+<div class="item">
+<small>Date</small>
+<h3>${b.date}</h3>
+</div>
+
+<div class="item">
+<small>Time</small>
+<h3>${b.time}</h3>
+</div>
+
+<div class="item">
+<small>Seat</small>
+<h3>${b.seat}</h3>
+</div>
+
+<div class="item">
+<small>Class</small>
+<h3>${b.class}</h3>
+</div>
+
+<div class="item">
+<small>Fare</small>
+<h3>₹${b.price}</h3>
+</div>
+
+<div class="item">
+<small>Mobile</small>
+<h3>${b.mobile}</h3>
+</div>
+
+</div>
+
+<br>
+
+<button onclick="view('${b.pnr}')">
+🎫 View Ticket
+</button>
+
+<button class="cancel"
+onclick="cancel('${b.pnr}')">
+✕ Cancel
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+function searchBooking(){
+
+let value=
+document.getElementById("search")
+.value.toLowerCase();
+
+let result=bookings.filter(b=>
+b.name.toLowerCase().includes(value) ||
+b.pnr.toLowerCase().includes(value)
+);
+
+show(result);
+}
+
+function view(pnr){
+
+let booking=bookings.find(b=>b.pnr===pnr);
+
+localStorage.setItem(
+"latest",
+JSON.stringify(booking)
+);
+
+location.href="ticket.html";
+}
+
+function cancel(pnr){
+
+if(!confirm("Cancel this ticket?"))return;
+
+bookings=bookings.filter(b=>b.pnr!==pnr);
+
+localStorage.setItem(
+"bookings",
+JSON.stringify(bookings)
+);
+
+show(bookings);
+
+alert("Ticket cancelled successfully!");
+}
+
+show(bookings);
+
+</script>
+
+</body>
+</html>
+```
+
